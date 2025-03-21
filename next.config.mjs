@@ -12,6 +12,7 @@ const nextConfig = {
 export default withPWA({
   dest: "public", // Where to output PWA files
   disable: process.env.NODE_ENV === "development", // Disable in dev
+  sw: "service-worker.js",
   register: true, // Auto-register service worker
   skipWaiting: true, // Update without waiting
   runtimeCaching: [
@@ -22,7 +23,7 @@ export default withPWA({
       },
       handler: "NetworkFirst",
       options: {
-        cacheName: "food-api-cache-v1",
+        cacheName: "food-api-cache-v2",
         networkTimeoutSeconds: 3,
         expiration: {
           maxEntries: 50,
@@ -55,7 +56,7 @@ export default withPWA({
       urlPattern: /\.(?:png|jpg|jpeg|svg|webp)$/,
       handler: "CacheFirst",
       options: {
-        cacheName: "image-cache",
+        cacheName: "image-cache-test",
         expiration: {
           maxEntries: 100,
           maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
