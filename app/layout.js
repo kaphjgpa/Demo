@@ -1,8 +1,11 @@
+"use client";
+import { useEffect } from "react";
 import { PWAInitializer } from "@/components/PWAInitializer";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import InstallPWA from "@/components/InstallPWA";
+import { register } from "@/utils/registerSW";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,13 +17,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "Shree Bikaner Sweets",
-  description: "Best place to get fresh sweets",
-};
+// export const metadata = {
+//   title: "Shree Bikaner Sweets",
+//   description: "Best place to get fresh sweets",
+// };
 
 export default function RootLayout({ children }) {
-  // app/page.js is the child here
+  useEffect(() => {
+    register();
+  }, []);
+
   return (
     <html lang="en">
       <head>
