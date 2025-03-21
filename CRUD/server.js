@@ -28,8 +28,8 @@ app.use(
 // Handle preflight requests explicitly
 app.options("*", cors());
 
-app.use("/api/admin", adminRoutes);
-app.use("/api/user", userRoutes);
+// app.use("/api/admin", adminRoutes);
+// app.use("/api/user", userRoutes);
 app.use("/api/food", foodRoutes);
 
 // Error Handling Middleware
@@ -40,5 +40,5 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { Download } from "lucide-react"; // Import Download icon
 
 // Helper function moved inside component
 const isIOS = () => {
@@ -45,9 +46,12 @@ export default function InstallPWA() {
   return (
     <button
       onClick={installClick}
-      className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-green-600 text-white px-5 py-3 
+               rounded-xl shadow-xl hover:bg-green-700 transition-all duration-300 transform 
+               hover:scale-105 backdrop-blur-lg bg-opacity-80 hover:shadow-2xl"
     >
-      {isAppleDevice ? "Add to Home Screen" : "Install App"}
+      <Download size={20} />
+      {isAppleDevice ? "Add to Home Screen" : "Install"}
     </button>
   );
 }

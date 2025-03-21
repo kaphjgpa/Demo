@@ -1,23 +1,97 @@
-<!-- public/offline.html -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Offline</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Internet Connection</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
         body {
+            background-color: #0d0d0d;
+            color: #fff;
             text-align: center;
-            font-family: sans-serif;
-            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .rocket {
+            width: 150px;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #222;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        .status-bar {
+            position: absolute;
+            bottom: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wifi-icon {
+            width: 16px;
+            height: auto;
         }
     </style>
 </head>
 
 <body>
-    <h1>You are offline</h1>
-    <p>Check your connection and try again later.</p>
+
+    <div class="container">
+        <img class="rocket" src="https://cdn-icons-png.flaticon.com/512/3052/3052644.png" alt="Rocket">
+        <h1>No internet connection</h1>
+        <button onclick="openSettings()">Open Device Settings</button>
+    </div>
+
+    <div class="status-bar">
+        <img class="wifi-icon" src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="WiFi Icon">
+        <span>No internet connection</span>
+    </div>
+
+    <script>
+        function openSettings() {
+            window.location.href = "chrome://settings"; // Opens browser settings
+        }
+    </script>
+
 </body>
 
 </html>

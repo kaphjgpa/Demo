@@ -1,64 +1,95 @@
-// public/service-worker.js
+import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import {
+  NetworkFirst,
+  StaleWhileRevalidate,
+  CacheFirst,
+} from "workbox-strategies";
+import { ExpirationPlugin } from "workbox-expiration";
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
 
-// Import Workbox from the CDN.
-importScripts(
-  "https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js"
+// Precache assets during installation
+precacheAndRoute(self.__WB_MANIFEST || []);
+
+// Cache API response (food data)
+registerRoute(
+  ({ url }) => url.href === "https://demo-ynml.onrender.com/api/food/get",
+  new NetworkFirst({
+    cacheName: "food-api-cache",
+    networkTimeoutSeconds: 5,
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60 * 24, // 24 hours
+      }),
+    ],
+  })
 );
 
-if (workbox) {
-  console.log("Workbox is loaded");
+// Cache static assets (JS, CSS, Fonts)
+registerRoute(
+  ({ request }) => ["script", "style", "font"].includes(request.destination),
+  new StaleWhileRevalidate({
+    cacheName: "static-assets",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+      }),
+    ],
+  })
+);
 
-  // Precache the offline fallback page and any other static assets you want.
-  workbox.precaching.precacheAndRoute([
-    { url: "/offline.html", revision: "1" },
-    // Optionally add other assets here
-  ]);
+// Cache images
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new CacheFirst({
+    cacheName: "image-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+      }),
+    ],
+  })
+);
 
-  // Cache the API response from the food endpoint.
-  workbox.routing.registerRoute(
-    ({ url }) => url.href === "https://demo-ynml.onrender.com/api/food/get",
-    new workbox.strategies.NetworkFirst({
-      cacheName: "api-cache",
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50,
-          maxAgeSeconds: 5 * 60, // cache for 5 minutes
-        }),
-      ],
+// Cache HTML pages with fallback
+registerRoute(
+  ({ request }) => request.mode === "navigate",
+  new NetworkFirst({
+    cacheName: "pages-cache",
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+      }),
+    ],
+  })
+);
+
+// Serve offline page when network is down
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match("/offline.html"))
+    );
+  }
+});
+
+// Install and activate service worker
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open("offline-cache").then((cache) => {
+      return cache.addAll(["/offline.html"]);
     })
   );
+});
 
-  // Cache static assets: scripts, styles, and images.
-  workbox.routing.registerRoute(
-    ({ request }) =>
-      request.destination === "script" ||
-      request.destination === "style" ||
-      request.destination === "image",
-    new workbox.strategies.CacheFirst({
-      cacheName: "static-assets",
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 100,
-          maxAgeSeconds: 24 * 60 * 60, // cache for 1 day
-        }),
-      ],
-    })
-  );
-
-  // Offline fallback for navigation requests.
-  workbox.routing.registerRoute(
-    // This catches all navigation requests.
-    ({ request }) => request.mode === "navigate",
-    async ({ event }) => {
-      try {
-        // Try to load the page from the network first.
-        return await workbox.strategies.networkFirst().handle({ event });
-      } catch (error) {
-        // If that fails, show the offline page.
-        return caches.match("/offline.html");
-      }
-    }
-  );
-} else {
-  console.log("Workbox didn't load");
-}
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
