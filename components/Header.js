@@ -23,7 +23,7 @@ function Header() {
       <div className="flex items-center">
         <Image
           className="rounded-full"
-          src="/Logo.jpg"
+          src="/logo.jpg"
           width={100}
           height={100}
           alt="Band Logo"
