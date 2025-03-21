@@ -1,10 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Download } from "lucide-react"; // Import Download icon
+import { Download } from "lucide-react";
 
-// Helper function moved inside component
 const isIOS = () => {
-  if (typeof window === "undefined") return false; // Handle SSR
+  if (typeof window === "undefined") return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 };
 
@@ -14,7 +13,7 @@ export default function InstallPWA() {
   const [isAppleDevice, setIsAppleDevice] = useState(false);
 
   useEffect(() => {
-    setIsAppleDevice(isIOS()); // Set platform detection on mount
+    setIsAppleDevice(isIOS());
 
     const handler = (e) => {
       e.preventDefault();
