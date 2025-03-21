@@ -60,7 +60,9 @@ function Items() {
   useEffect(() => {
     const fetchFood = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/food/get");
+        const response = await axios.get(
+          "https://demo-ynml.onrender.com/api/food/get"
+        );
         setFood(response.data.foodItems);
       } catch (err) {
         console.error("Error fetching food", err);
