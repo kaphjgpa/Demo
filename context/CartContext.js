@@ -4,14 +4,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  // Function to get the food cart data from localStorage
-  const getLocalFoodData = () => {
-    const localCart = localStorage.getItem("foodCart");
-    return localCart ? JSON.parse(localCart) : [];
-  };
-
-  // Lazy initialization: the function is called only on the initial render
-  const [cart, setCart] = useState(() => getLocalFoodData());
+  // Lazy initialization: This ensures we get data from localStorage before the first render
+  const [cart, setCart] = useState(() => {
+    if (typeof window !== "undefined") {
+      const localCart = localStorage.getItem("foodCart");
+      return localCart ? JSON.parse(localCart) : [];
+    }
+    return [];
+  });
 
   const addToCart = (item) => {
     setCart((prevCart) => {
@@ -31,9 +31,11 @@ export const CartProvider = ({ children }) => {
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Save cart to localStorage whenever it changes
+  // Save to localStorage whenever the cart updates
   useEffect(() => {
-    localStorage.setItem("foodCart", JSON.stringify(cart));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foodCart", JSON.stringify(cart));
+    }
   }, [cart]);
 
   return (
