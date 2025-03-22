@@ -19,6 +19,14 @@ export default withPWA({
     { url: "/icons/icon-192x192.png", revision: "1" },
     { url: "/icons/icon-512x512.png", revision: "1" },
   ],
+  headers: () => [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Content-Security-Policy", value: "default-src 'self'" },
+      ],
+    },
+  ],
   // runtimeCaching: [
   //   {
   //     urlPattern: ({ url }) => url.href.includes("/api/food/get"),
