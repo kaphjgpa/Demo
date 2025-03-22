@@ -1,126 +1,316 @@
-import { precacheAndRoute } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
-import {
-  NetworkFirst,
-  StaleWhileRevalidate,
-  CacheFirst,
-} from "workbox-strategies";
-import { ExpirationPlugin } from "workbox-expiration";
-import { BackgroundSyncPlugin } from "workbox-background-sync";
-import { CacheableResponsePlugin } from "workbox-cacheable-response";
-
-const CACHE_VERSION = "v6";
-const API_CACHE = `food-api-${CACHE_VERSION}`;
-const STATIC_CACHE = `static-assets-${CACHE_VERSION}`;
-const IMAGE_CACHE = `images-${CACHE_VERSION}`;
-
-// 1. Precaching Configuration
-precacheAndRoute(self.__WB_MANIFEST);
-
-// 2. API Caching with Background Sync
-registerRoute(
-  ({ url }) => url.href.includes("/api/food/get"),
-  new NetworkFirst({
-    cacheName: API_CACHE,
-    plugins: [
-      new BackgroundSyncPlugin("food-queue", {
-        maxRetentionTime: 24 * 60, // 24 hours
-      }),
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 86400, // 24 hours
-      }),
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-    ],
-  }),
-  "GET"
-);
-
-// 3. Static Assets Caching
-registerRoute(
-  ({ request }) => ["script", "style", "font"].includes(request.destination),
-  new StaleWhileRevalidate({
-    cacheName: STATIC_CACHE,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 200,
-        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-      }),
-    ],
-  })
-);
-
-// 4. Image Caching
-registerRoute(
-  ({ request }) => request.destination === "image",
-  new CacheFirst({
-    cacheName: IMAGE_CACHE,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 100,
-        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-      }),
-    ],
-  })
-);
-
-// 5. Navigation Fallback
-registerRoute(
-  ({ request }) => request.mode === "navigate",
-  new NetworkFirst({
-    cacheName: "pages-cache",
-    networkTimeoutSeconds: 3,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-      }),
-    ],
-  })
-);
-
-// Service Worker Lifecycle Events (Keep only these)
-self.addEventListener("install", (event) => {
-  console.log("[SW] Install event");
-  event.waitUntil(
-    caches
-      .open(IMAGE_CACHE)
-      .then((cache) => {
-        console.log("[SW] Pre-caching essential assets");
-        return cache.addAll([
-          "/offline",
-          "/icons/icon-192x192.png",
-          "/icons/icon-512x512.png",
-        ]);
-      })
-      .catch((error) => {
-        console.error("[SW] Install failed:", error);
+if (!self.define) {
+  let e,
+    s = {};
+  const n = (n, t) => (
+    (n = new URL(n + ".js", t).href),
+    s[n] ||
+      new Promise((s) => {
+        if ("document" in self) {
+          const e = document.createElement("script");
+          (e.src = n), (e.onload = s), document.head.appendChild(e);
+        } else (e = n), importScripts(n), s();
+      }).then(() => {
+        let e = s[n];
+        if (!e) throw new Error(`Module ${n} didn’t register its module`);
+        return e;
       })
   );
-});
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-  self.skipWaiting(); // Force activate new SW
-});
-
-self.addEventListener("activate", (event) => {
-  console.log("[SW] Activate event");
-  event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (!cacheName.includes(CACHE_VERSION)) {
-              console.log("[SW] Deleting old cache:", cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      .then(() => self.clients.claim())
-  );
+  self.define = (t, i) => {
+    const a =
+      e ||
+      ("document" in self ? document.currentScript.src : "") ||
+      location.href;
+    if (s[a]) return;
+    let c = {};
+    const o = (e) => n(e, a),
+      r = { module: { uri: a }, exports: c, require: o };
+    s[a] = Promise.all(t.map((e) => r[e] || o(e))).then((e) => (i(...e), c));
+  };
+}
+define(["./workbox-4d767a27"], function (e) {
+  "use strict";
+  importScripts(),
+    self.skipWaiting(),
+    e.clientsClaim(),
+    e.precacheAndRoute(
+      [
+        {
+          url: "/_next/app-build-manifest.json",
+          revision: "2a0e92ce20b2d3514609123de4c7e98e",
+        },
+        {
+          url: "/_next/static/UsBMqitQmFe7XGGblsD8u/_buildManifest.js",
+          revision: "4f4fedd42a8b33e8a6cc236c06abbc36",
+        },
+        {
+          url: "/_next/static/UsBMqitQmFe7XGGblsD8u/_ssgManifest.js",
+          revision: "b6652df95db52feb4daf4eca35380933",
+        },
+        {
+          url: "/_next/static/chunks/341.2903e54d3da731c1.js",
+          revision: "2903e54d3da731c1",
+        },
+        {
+          url: "/_next/static/chunks/472.a3826d29d6854395.js",
+          revision: "a3826d29d6854395",
+        },
+        {
+          url: "/_next/static/chunks/4bd1b696-a2a2d888e797cb28.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/684-2e5d903010516a09.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/840-74bde85951594eaa.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/app/_not-found/page-3e9bf5ab6a26651e.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/app/layout-904d1bcbe013f2b7.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/app/offline/page-36027c75a1bebbed.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/app/page-4758ef4dcd0780b9.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/framework-859199dea06580b0.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/main-7c3d76bc2d2ca3fc.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/main-app-5a31adc37542aa94.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/pages/_app-a66f9296699c5863.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/pages/_error-7688f4c9a69e67c8.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          revision: "846118c33b2c0e922d7b3a7676f81f6f",
+        },
+        {
+          url: "/_next/static/chunks/webpack-7c8b9563cf141449.js",
+          revision: "UsBMqitQmFe7XGGblsD8u",
+        },
+        {
+          url: "/_next/static/css/5af11126516e1379.css",
+          revision: "5af11126516e1379",
+        },
+        {
+          url: "/_next/static/media/569ce4b8f30dc480-s.p.woff2",
+          revision: "ef6cefb32024deac234e82f932a95cbd",
+        },
+        {
+          url: "/_next/static/media/747892c23ea88013-s.woff2",
+          revision: "a0761690ccf4441ace5cec893b82d4ab",
+        },
+        {
+          url: "/_next/static/media/93f479601ee12b01-s.p.woff2",
+          revision: "da83d5f06d825c5ae65b7cca706cb312",
+        },
+        {
+          url: "/_next/static/media/ba015fad6dcf6784-s.woff2",
+          revision: "8ea4f719af3312a055caf09f34c89a77",
+        },
+        { url: "/icons/icon-192x192.png", revision: "1" },
+        { url: "/icons/icon-512x512.png", revision: "1" },
+        { url: "app/offline/page.jsx", revision: "1" },
+      ],
+      { ignoreURLParametersMatching: [] }
+    ),
+    e.cleanupOutdatedCaches(),
+    e.registerRoute(
+      "/",
+      new e.NetworkFirst({
+        cacheName: "start-url",
+        plugins: [
+          {
+            cacheWillUpdate: async ({
+              request: e,
+              response: s,
+              event: n,
+              state: t,
+            }) =>
+              s && "opaqueredirect" === s.type
+                ? new Response(s.body, {
+                    status: 200,
+                    statusText: "OK",
+                    headers: s.headers,
+                  })
+                : s,
+          },
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
+      new e.CacheFirst({
+        cacheName: "google-fonts-webfonts",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 31536e3 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "google-fonts-stylesheets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 604800 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "static-font-assets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 604800 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "static-image-assets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 64, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\/_next\/image\?url=.+$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "next-image",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 64, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:mp3|wav|ogg)$/i,
+      new e.CacheFirst({
+        cacheName: "static-audio-assets",
+        plugins: [
+          new e.RangeRequestsPlugin(),
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:mp4)$/i,
+      new e.CacheFirst({
+        cacheName: "static-video-assets",
+        plugins: [
+          new e.RangeRequestsPlugin(),
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:js)$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "static-js-assets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:css|less)$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "static-style-assets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\/_next\/data\/.+\/.+\.json$/i,
+      new e.StaleWhileRevalidate({
+        cacheName: "next-data",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      /\.(?:json|xml|csv)$/i,
+      new e.NetworkFirst({
+        cacheName: "static-data-assets",
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      ({ url: e }) => {
+        if (!(self.origin === e.origin)) return !1;
+        const s = e.pathname;
+        return !s.startsWith("/api/auth/") && !!s.startsWith("/api/");
+      },
+      new e.NetworkFirst({
+        cacheName: "apis",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 16, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      ({ url: e }) => {
+        if (!(self.origin === e.origin)) return !1;
+        return !e.pathname.startsWith("/api/");
+      },
+      new e.NetworkFirst({
+        cacheName: "others",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 86400 }),
+        ],
+      }),
+      "GET"
+    ),
+    e.registerRoute(
+      ({ url: e }) => !(self.origin === e.origin),
+      new e.NetworkFirst({
+        cacheName: "cross-origin",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new e.ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 3600 }),
+        ],
+      }),
+      "GET"
+    );
 });

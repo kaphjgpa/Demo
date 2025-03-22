@@ -15,7 +15,7 @@ export default withPWA({
   sw: "service-worker.js",
   disable: process.env.NODE_ENV === "development",
   additionalManifestEntries: [
-    { url: "/offline", revision: "1" },
+    { url: "app/offline/page.jsx", revision: "1" },
     { url: "/icons/icon-192x192.png", revision: "1" },
     { url: "/icons/icon-512x512.png", revision: "1" },
   ],

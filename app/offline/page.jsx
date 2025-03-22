@@ -1,19 +1,12 @@
-"use client";
-// app/offline/page.jsx - Enhanced offline page
-import { useCart } from "@/context/CartContext";
-export default function OfflinePage() {
-  const { cart } = useCart();
+export const metadata = {
+  title: "Offline Mode - Shree Bikaner Sweets",
+};
 
+export default function OfflinePage() {
   return (
     <div className="p-4">
-      <h1>Offline Mode</h1>
-      <p>Showing cached content</p>
-      {/* Show cached cart */}
-      <div className="mt-4">
-        {cart.map((item) => (
-          <div key={item._id}>{item.foodName}</div>
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold">You're Offline</h1>
+      <p className="mt-2">Please check your internet connection</p>
     </div>
   );
 }
