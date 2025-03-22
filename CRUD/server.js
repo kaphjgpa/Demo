@@ -2,8 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/database");
-const adminRoutes = require("./routes/adminRoutes");
-const userRoutes = require("./routes/userRoutes");
+// const adminRoutes = require("./routes/adminRoutes");
+// const userRoutes = require("./routes/userRoutes");
 const foodRoutes = require("./routes/foodRoutes");
 
 dotenv.config();
@@ -18,7 +18,11 @@ app.use(express.json());
 // Enable CORS
 app.use(
   cors({
-    origin: ["https://demo-blush-psi-31.vercel.app", "http://localhost:3000"],
+    origin: [
+      "https://demo-blush-psi-31.vercel.app",
+      "http://localhost:3000",
+      "http://172.26.192.1:3000",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
