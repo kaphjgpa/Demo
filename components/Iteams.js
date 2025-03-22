@@ -4,7 +4,7 @@ import { CirclePlus } from "lucide-react";
 import axios from "axios";
 import { useCart } from "@/context/CartContext";
 
-// Custom component that caches images using the Cache API
+//Custom component that caches images using the Cache API
 const CachedImage = ({ src, alt, ...rest }) => {
   const [cachedUrl, setCachedUrl] = useState(null);
   const objectUrlRef = useRef(null);
@@ -94,6 +94,14 @@ function Items() {
                 priority
                 sizes="(max-width: 300px), (max-width: 300px)"
               />
+              {/* <Image
+                src={item.foodUrl}
+                alt={item.foodName}
+                width={300}
+                height={200}
+                className="object-cover"
+                priority
+              /> */}
             </div>
 
             <div className="p-4 bg-gray-100 flex flex-col">
