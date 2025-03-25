@@ -1,8 +1,12 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Wifi, WifiOff } from "lucide-react";
+import { Button } from "./ui/button";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 function Header() {
+  const session = useSession();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -28,6 +32,11 @@ function Header() {
           height={100}
           alt="Band Logo"
         />
+      </div>
+      <div>
+        <Button onClick={() => signIn()}> signIn </Button>
+        <Button onClick={() => signOut()}> signOut </Button>
+        {JSON.stringify(session)}
       </div>
       <div className="font-medium text-2xl flex items-center gap-2">
         {isOnline ? (

@@ -3,7 +3,7 @@ import withPWA from "next-pwa";
 
 const nextConfig = {
   reactStrictMode: true,
-  // swcMinify: true,
+  productionBrowserSourceMaps: true,
   images: {
     domains: ["s3.ap-south-1.amazonaws.com"],
   },

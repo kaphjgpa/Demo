@@ -1,8 +1,8 @@
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "@components/ui/button";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@context/CartContext";
 
 function Cart() {
   const { cart, removeFromCart, total } = useCart();

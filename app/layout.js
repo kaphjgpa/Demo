@@ -1,11 +1,12 @@
 "use client";
 import { useEffect } from "react";
-import { PWAInitializer } from "@/components/PWAInitializer";
+import { PWAInitializer } from "../components/PWAInitializer";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CartProvider } from "@/context/CartContext";
-import InstallPWA from "@/components/InstallPWA";
-import { register } from "@/utils/registerSW";
+import InstallPWA from "@components/InstallPWA";
+// import register from "@utils/registerSW";
+
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +24,9 @@ const geistMono = Geist_Mono({
 // };
 
 export default function RootLayout({ children }) {
-  useEffect(() => {
-    register();
-  }, []);
+  // useEffect(() => {
+  //   register();
+  // }, []);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -53,11 +54,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-300 `}
       >
-        <CartProvider>
+        <Providers>
           <PWAInitializer />
           {children}
           <InstallPWA />
-        </CartProvider>
+        </Providers>
       </body>
     </html>
   );
