@@ -1,6 +1,8 @@
 import Image from "next/image";
 import AddToCartButton from "./AddToCartButton"; // Client Component
 
+export const dynamic = "force-dynamic";
+
 export default async function Items() {
   try {
     // Fetch food items on the server

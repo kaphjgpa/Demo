@@ -14,7 +14,7 @@ export const NEXT_AUTH = {
           placeholder: "Password",
         },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials) {
         console.log(credentials);
         return {
           id: "1",
@@ -34,15 +34,24 @@ export const NEXT_AUTH = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    // session: ({ session, token, user }: any) => {
-    //   console.log(session);
-    //   if (session && session.user) {
-    //     session.user.id = token.sub; // token.sub
-    //   }
-    //   return session;
-    // },
+    jwt: ({ token, user }) => {
+      if (user) {
+        console.log("====GOOGLE=USER====", user);
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
+      }
+      console.log("=====UPDATED=TOKEN=====", token);
+      return token;
+    },
+    session: ({ session, token }) => {
+      console.log("=====GOOGLE=SESSION====", session);
+      session.user.id = token.id;
+      session.user.picture = token.picture;
+      return session;
+    },
   },
-  //Add new Login Component
   pages: {
     signIn: "/signin",
   },

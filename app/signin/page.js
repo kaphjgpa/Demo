@@ -1,6 +1,6 @@
 "use client";
 import { Github } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
