@@ -24,10 +24,6 @@ const geistMono = Geist_Mono({
 // };
 
 export default function RootLayout({ children }) {
-  // useEffect(() => {
-  //   register();
-  // }, []);
-
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
