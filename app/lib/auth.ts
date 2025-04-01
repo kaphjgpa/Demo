@@ -16,7 +16,6 @@ export const NEXT_AUTH = {
       },
       async authorize(credentials: any) {
         console.log(credentials);
-        //validation
         return {
           id: "1",
           name: "Surendra Singh",
@@ -35,16 +34,16 @@ export const NEXT_AUTH = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    session: ({ session, token, user }: any) => {
-      console.log(session);
-      if (session && session.user) {
-        session.user.id = token.sub; // token.sub
-      }
-      return session;
-    },
+    // session: ({ session, token, user }: any) => {
+    //   console.log(session);
+    //   if (session && session.user) {
+    //     session.user.id = token.sub; // token.sub
+    //   }
+    //   return session;
+    // },
   },
   //Add new Login Component
-  //   pages: {
-  //     signIn: "/signin",
-  //   },
+  pages: {
+    signIn: "/signin",
+  },
 };
