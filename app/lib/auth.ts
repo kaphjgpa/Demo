@@ -18,9 +18,9 @@ export const NEXT_AUTH = {
           placeholder: "********",
         },
       },
-      async authorize(credentials) {
+      authorize: async (credentials) => {
         try {
-          const response = await fetch(
+          let response = await fetch(
             "https://demo-ynml.onrender.com/api/user/signin",
             {
               method: "POST",
@@ -33,7 +33,22 @@ export const NEXT_AUTH = {
           );
 
           if (!response.ok) {
-            throw new Error("Signup failed");
+            // If login fails, try to sign up the user
+            response = await fetch(
+              "https://demo-ynml.onrender.com/api/user/signup",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: credentials?.email,
+                  password: credentials?.password,
+                }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Signup failed");
+            }
           }
 
           const user = await response.json();
@@ -43,13 +58,13 @@ export const NEXT_AUTH = {
           }
 
           return {
-            id: user._id,
-            name: user.email,
+            id: user.userId,
+            email: user.email,
             backendToken: user.token,
           };
         } catch (error) {
-          console.error("Signup error:", error.message);
-          throw new Error(error.message || "Signup failed");
+          console.error("Auth error:", error.message);
+          throw new Error(error.message || "Authentication failed");
         }
       },
     }),
@@ -66,14 +81,12 @@ export const NEXT_AUTH = {
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        // token.id = user._id;
         token.backendToken = user.backendToken;
       }
       return token;
     },
     session: async ({ session, token }) => {
       session.user.backendToken = token.backendToken;
-      // session.user.id = token.id;
       return session;
     },
   },
