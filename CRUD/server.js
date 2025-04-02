@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/database");
 // const adminRoutes = require("./routes/adminRoutes");
-// const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/userRoutes");
 const foodRoutes = require("./routes/foodRoutes");
 
 dotenv.config();
@@ -33,7 +33,7 @@ app.use(
 app.options("*", cors());
 
 // app.use("/api/admin", adminRoutes);
-// app.use("/api/user", userRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/food", foodRoutes);
 
 // Error Handling Middleware

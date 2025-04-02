@@ -1,53 +1,40 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  userName: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 3,
-    maxlength: 50,
+const userSchema = new mongoose.Schema(
+  {
+    // userName: {
+    //   type: String,
+    //   required: true,
+    //   unique: true,
+    //   trim: true,
+    //   minlength: 3,
+    //   maxlength: 50,
+    // },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+    },
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 6, // Min 6 for usability
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
-  firstName: {
-    type: String,
-    required: true,
-    min: 1,
-    max: 20,
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 3,
-    maxlength: 20,
-  },
-  gender: {
-    type: String,
-    required: true,
-    enum: ["male", "female", "other"],
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    min: 10,
-    max: 1000,
-  },
-  contactNumber: {
-    type: Number,
-    required: true,
-    trim: true,
-    minlength: [10, "Contact number must be at least 10 digits"],
-    maxlength: [10, "Contact number must be at most 10 digits"],
-    match: [/^\d{10}$/, "Contact number must be a valid 10-digit number"], // Regex for validation
-  },
-  blocked: {
-    type: Boolean,
-    default: false,
-  },
-});
+  { timestamps: true } // Adds createdAt and updatedAt automatically
+);
+
+// 🔹 Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
@@ -59,8 +46,11 @@ userSchema.pre("save", async function (next) {
   }
 });
 
+// 🔹 Password verification method
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
 const User = mongoose.model("User", userSchema);
 
-module.exports = {
-  User,
-};
+module.exports = { User };

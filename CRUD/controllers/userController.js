@@ -7,19 +7,14 @@ const { JWT_SECRET } = require("../config");
 
 // Signup Validation Schema
 const signupBody = zod.object({
-  userName: zod.string().email(),
-  firstName: zod.string().min(1, "First name is required"),
-  lastName: zod.string().min(1, "Last name is required"),
-  gender: zod.string(),
+  // userName: zod.string(),
+  email: zod.string().email(),
   password: zod.string().min(6, "Password must be at least 6 characters long"),
-  contactNumber: zod
-    .number()
-    .min(1000000000, "Contact number must be at least 10 digits"),
 });
 
 // Signin Validation Schema
 const signinBody = zod.object({
-  userName: zod.string().email(),
+  email: zod.string().email(),
   password: zod.string().min(8),
 });
 
@@ -37,7 +32,6 @@ const updateBody = zod.object({
 //--Signup Controller--//
 exports.signup = async (req, res) => {
   try {
-    // Validate request body
     const validation = signupBody.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({
@@ -46,39 +40,36 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Check if the email is already registered
-    const existingUser = await User.findOne({ userName: req.body.userName });
+    const existingUser = await User.findOne({
+      // userName: req.body.userName,
+      email: req.body.email,
+    });
     if (existingUser) {
-      return res.status(409).json({
-        message: "Email already taken",
-      });
+      return res.status(409).json({ message: "Email already taken" });
     }
 
-    // Create a new Useristrator
     const user = await User.create({
-      userName: req.body.userName,
+      // userName: req.body.userName,
+      email: req.body.email,
       password: req.body.password,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      gender: req.body.gender,
-      contactNumber: req.body.contactNumber,
     });
 
-    // Generate a JWT token (expires in 5 minutes)
-    const token = jwt.sign({ userName: user.userName }, JWT_SECRET, {
-      expiresIn: "12h",
-    });
+    const token = jwt.sign(
+      { userName: user.userName, email: user.email },
+      JWT_SECRET,
+      {
+        expiresIn: "720h",
+      }
+    );
 
-    res.status(201).json({
-      message: "User account created successfully",
-      token: token,
-    });
+    res
+      .status(201)
+      .json({ message: "User account created successfully", token: token });
   } catch (error) {
     console.error("Error during signup:", error.message);
-    res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -95,7 +86,7 @@ exports.signin = async (req, res) => {
     }
 
     // Find user by userName (email)
-    const user = await User.findOne({ userName: req.body.userName });
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(404).json({
         message: "User not found",
@@ -116,15 +107,15 @@ exports.signin = async (req, res) => {
     );
     if (!isPasswordMatch) {
       return res.status(401).json({
-        message: "Incorrect password",
+        message: "Incorrect password OR Password not matched",
       });
     }
 
     // Generate a JWT token (valid for 12 hours)
     const token = jwt.sign(
-      { userId: user._id, userName: user.userName }, // Include userId for future requests
+      { userId: user._id, email: user.email }, // Include userId for future requests
       JWT_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: "720h" }
     );
 
     res.status(200).json({
@@ -132,9 +123,11 @@ exports.signin = async (req, res) => {
       token,
       user: {
         userId: user._id,
-        userName: user.userName,
+        email: user.email,
+        password: user.password,
       },
     });
+    console.log(user);
   } catch (error) {
     console.error("Error during signin:", error.message);
     res.status(500).json({

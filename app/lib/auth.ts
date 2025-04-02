@@ -5,22 +5,53 @@ import GitHubProvider from "next-auth/providers/github";
 export const NEXT_AUTH = {
   providers: [
     CredentialsProvider({
-      name: "Email",
+      name: "Credentials",
       credentials: {
-        username: { label: "email", type: "text", placeholder: "Email" },
+        username: {
+          label: "Username",
+          type: "text",
+          placeholder: "example@gmail.com",
+        },
         password: {
-          label: "password",
+          label: "Password",
           type: "password",
-          placeholder: "Password",
+          placeholder: "********",
         },
       },
       async authorize(credentials) {
-        console.log(credentials);
-        return {
-          id: "1",
-          name: "Surendra Singh",
-          password: "surendrasinghc80@gmail.com",
-        };
+        try {
+          const response = await fetch(
+            "https://demo-ynml.onrender.com/api/user/signup",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                username: credentials?.username,
+                password: credentials?.password,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Signup failed");
+          }
+
+          const user = await response.json();
+
+          if (!user?.token) {
+            throw new Error("Invalid response from server");
+          }
+
+          // Return the user data along with the backend token
+          return {
+            id: user.userName, // Assuming userName is unique
+            name: user.userName,
+            backendToken: user.token, // Store JWT token
+          };
+        } catch (error) {
+          console.error("Signup error:", error.message);
+          throw new Error(error.message || "Signup failed");
+        }
       },
     }),
     GoogleProvider({
@@ -34,25 +65,22 @@ export const NEXT_AUTH = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user }) => {
       if (user) {
-        console.log("====GOOGLE=USER====", user);
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.picture = user.image;
+        token.backendToken = user.backendToken; // Store backend JWT in token
       }
-      console.log("=====UPDATED=TOKEN=====", token);
       return token;
     },
-    session: ({ session, token }) => {
-      console.log("=====GOOGLE=SESSION====", session);
-      session.user.id = token.id;
-      session.user.picture = token.picture;
+    session: async ({ session, token }) => {
+      session.user.backendToken = token.backendToken; // Include JWT in session
       return session;
     },
   },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
   pages: {
-    signIn: "/signin",
+    signIn: "/signin", // Customize sign-in page if needed
   },
 };
