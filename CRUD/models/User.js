@@ -3,14 +3,6 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    // userName: {
-    //   type: String,
-    //   required: true,
-    //   unique: true,
-    //   trim: true,
-    //   minlength: 3,
-    //   maxlength: 50,
-    // },
     email: {
       type: String,
       required: true,
@@ -31,10 +23,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
   },
-  { timestamps: true } // Adds createdAt and updatedAt automatically
+  { timestamps: true }
 );
 
-// 🔹 Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {

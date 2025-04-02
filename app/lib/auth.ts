@@ -7,7 +7,7 @@ export const NEXT_AUTH = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: {
+        email: {
           label: "Username",
           type: "text",
           placeholder: "example@gmail.com",
@@ -21,12 +21,12 @@ export const NEXT_AUTH = {
       async authorize(credentials) {
         try {
           const response = await fetch(
-            "https://demo-ynml.onrender.com/api/user/signup",
+            "https://demo-ynml.onrender.com/api/user/signin",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                username: credentials?.username,
+                email: credentials?.email,
                 password: credentials?.password,
               }),
             }
@@ -42,11 +42,10 @@ export const NEXT_AUTH = {
             throw new Error("Invalid response from server");
           }
 
-          // Return the user data along with the backend token
           return {
-            id: user.userName, // Assuming userName is unique
-            name: user.userName,
-            backendToken: user.token, // Store JWT token
+            id: user._id,
+            name: user.email,
+            backendToken: user.token,
           };
         } catch (error) {
           console.error("Signup error:", error.message);
@@ -67,20 +66,18 @@ export const NEXT_AUTH = {
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        token.backendToken = user.backendToken; // Store backend JWT in token
+        // token.id = user._id;
+        token.backendToken = user.backendToken;
       }
       return token;
     },
     session: async ({ session, token }) => {
-      session.user.backendToken = token.backendToken; // Include JWT in session
+      session.user.backendToken = token.backendToken;
+      // session.user.id = token.id;
       return session;
     },
   },
-  // session: {
-  //   strategy: "jwt",
-  //   maxAge: 30 * 24 * 60 * 60,
-  // },
   pages: {
-    signIn: "/signin", // Customize sign-in page if needed
+    signIn: "/signin",
   },
 };

@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 function Header() {
-  const session = useSession();
+  const { data: session, status } = useSession();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -34,8 +34,11 @@ function Header() {
         />
       </div>
       <div>
-        <Button onClick={() => signIn()}> signIn </Button>
-        <Button onClick={() => signOut()}> signOut </Button>
+        {status === "authenticated" ? (
+          <Button onClick={() => signOut()}> signOut </Button>
+        ) : (
+          <Button onClick={() => signIn()}> signIn </Button>
+        )}
         {JSON.stringify(session)}
       </div>
       <div className="font-medium text-2xl flex items-center gap-2">
