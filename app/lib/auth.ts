@@ -76,10 +76,10 @@ export const NEXT_AUTH = {
       return session;
     },
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-  },
+  // session: {
+  //   strategy: "jwt",
+  //   maxAge: 30 * 24 * 60 * 60,
+  // },
   pages: {
     signIn: "/signin", // Customize sign-in page if needed
   },
