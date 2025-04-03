@@ -1,9 +1,7 @@
 // controllers/UserController.js
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const { User } = require("../models/User");
-const { JWT_SECRET } = require("../config");
 
 // Signup Validation Schema
 const signupBody = zod.object({
@@ -40,13 +38,10 @@ exports.signup = async (req, res) => {
       return res.status(409).json({ message: "Email already taken" });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-    // Create new user
+    // Create new user (no explicit password hashing here - let the pre-save hook handle it)
     const user = await User.create({
       email: req.body.email,
-      password: hashedPassword,
+      password: req.body.password, // Pass the raw password - the schema hook will hash it
     });
 
     // Generate JWT token
@@ -72,46 +67,33 @@ exports.signup = async (req, res) => {
 //--Signin Controller--//
 exports.signin = async (req, res) => {
   try {
-    // Validate request body using Zod
+    // Validate request body
     const validation = signinBody.safeParse(req.body);
     if (!validation.success) {
+      console.log("Validation Errors:", validation.error.errors);
       return res.status(400).json({
         message: "Invalid input data",
         errors: validation.error.errors,
       });
     }
 
-    // Find user by userName (email)
-    const user = await User.findOne({ email: req.body.email });
+    // Find user by email (case insensitive)
+    const user = await User.findOne({ email: req.body.email.toLowerCase() });
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the user is blocked
-    // if (user.blocked) {
-    //   return res.status(403).json({
-    //     message: "Your account is blocked. Contact your Admin",
-    //   });
-    // }
-
-    // Compare password with hashed password
-    const isPasswordMatch = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
+    // Compare password using the schema method
+    const isPasswordMatch = await user.comparePassword(req.body.password);
     if (!isPasswordMatch) {
-      return res.status(401).json({
-        message: "Incorrect password OR Password not matched",
-      });
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
-    // Generate a JWT token (valid for 12 hours)
+    // Generate JWT
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, // Include userId for future requests
-      JWT_SECRET,
-      { expiresIn: "720h" }
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "12h" }
     );
 
     res.status(200).json({
@@ -120,16 +102,12 @@ exports.signin = async (req, res) => {
       user: {
         userId: user._id,
         email: user.email,
-        password: user.password,
-        token,
       },
     });
-    console.log(user);
   } catch (error) {
     console.error("Error during signin:", error.message);
-    res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
